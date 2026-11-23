@@ -1,0 +1,11 @@
+# Alte WordPress-Pfade und Varianten auf die neue Struktur
+/es/*            /:splat                      301
+/?lang=en        /en/                         301
+/en              /en/                         301
+/index.php       /                            301
+/wp-login.php    /                            301
+/wp-admin/*      /                            301
+/feed/*          /                            301
+/rutas/excursiones/  /excursiones/            301
+/reservaciones/  /reservas/                   301
+/donde-estamos/  /contacto/                   301
