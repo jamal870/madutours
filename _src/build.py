@@ -340,10 +340,15 @@ def page_place(lang, key):
 <section class="section section-tint"><div class="wrap"><div class="split"><div class="prose">{body}</div><div class="facts facts-col">{specs}</div></div></div></section>
 ''' + video_block(lang, p["video"]) + gallery(lang, p["gallery"], ui["gallery"]) + cta_band(lang, L["h1"]))
 
-def form_html(lang):
+def form_html(lang, page_key):
     ui = t(lang); f = ui["form"]
     opts = "".join(f'<option>{esc(o)}</option>' for o in f["types"])
-    return f'''<form class="booking" id="bookingForm" data-wa="{S["whatsapp"]}" data-mail="{S["email"]}" data-subject="{esc(f["subject"])}" data-required="{esc(f["required"])}" novalidate>
+    return f'''<form class="booking" id="bookingForm" name="anfrage" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field"
+  data-wa="{S["whatsapp"]}" data-subject="{esc(f["subject"])}" data-required="{esc(f["required"])}" data-ok="{esc(f["ok"])}" data-fail="{esc(f["fail"])}" data-sending="{esc(f["sending"])}" novalidate>
+  <input type="hidden" name="form-name" value="anfrage">
+  <input type="hidden" name="language" value="{lang}">
+  <input type="hidden" name="page" value="{page_key}">
+  <p class="hp" hidden><label>Do not fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
   <div class="grid2">
     <label><span>{esc(f["name"])} *</span><input name="name" id="f-name" required autocomplete="name"></label>
     <label><span>{esc(f["email"])}</span><input name="email" id="f-email" type="email" autocomplete="email"></label>
@@ -354,8 +359,9 @@ def form_html(lang):
     <label class="full"><span>{esc(f["type"])}</span><select name="type" id="f-type">{opts}</select></label>
     <label class="full"><span>{esc(f["message"])} *</span><textarea name="message" id="f-message" rows="5" required></textarea></label>
   </div>
-  <p class="form-error" id="formError" hidden></p>
-  <div class="cta-row"><button class="btn btn-gold" type="submit" data-via="wa">{ICON["wa"]}<span>{esc(f["send_wa"])}</span></button><button class="btn btn-primary" type="submit" data-via="mail">{ICON["mail"]}<span>{esc(f["send_mail"])}</span></button></div>
+  <p class="form-error" id="formError" role="alert" hidden></p>
+  <p class="form-ok" id="formOk" role="status" hidden></p>
+  <div class="cta-row"><button class="btn btn-gold" type="submit" data-via="form"><span>{esc(f["send_form"])}</span></button><button class="btn btn-ghost-dark" type="submit" data-via="wa">{ICON["wa"]}<span>{esc(f["send_wa"])}</span></button></div>
   <p class="note">{esc(f["hint"])}</p>
 </form>'''
 
@@ -370,7 +376,7 @@ def contact_cards(lang):
 
 def page_booking(lang):
     p = C.PAGES["reservas"]; L = p[lang]
-    return hero(lang, p, L["h1"], L["lead"], size="sm", alt="") + f'<section class="section"><div class="wrap narrow">{form_html(lang)}</div></section><section class="section section-tint"><div class="wrap">{contact_cards(lang)}</div></section>'
+    return hero(lang, p, L["h1"], L["lead"], size="sm", alt="") + f'<section class="section"><div class="wrap narrow">{form_html(lang, "reservas")}</div></section><section class="section section-tint"><div class="wrap">{contact_cards(lang)}</div></section>'
 
 def page_contact(lang):
     p = C.PAGES["contacto"]; L = p[lang]; ui = t(lang)
@@ -379,7 +385,7 @@ def page_contact(lang):
     return (hero(lang, p, L["h1"], L["lead"], size="sm", alt="")
         + f'''<section class="section"><div class="wrap">{contact_cards(lang)}</div></section>
 <section class="map-section"><iframe title="{"Mapa" if lang=="es" else "Map"}" src="https://www.google.com/maps?q={q}&z=12&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></section>
-<section class="section"><div class="wrap narrow"><h2 class="h2">{esc(ui["write_us"])}</h2>{form_html(lang)}</div></section>''')
+<section class="section"><div class="wrap narrow"><h2 class="h2">{esc(ui["write_us"])}</h2>{form_html(lang, "contacto")}</div></section>''')
 
 BUILDERS = {"home": page_home, "about": page_about, "rutas": page_rutas, "reservas": page_booking, "contacto": page_contact}
 

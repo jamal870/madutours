@@ -42,27 +42,35 @@
     lb.addEventListener('touchstart', function (e) { tx = e.changedTouches[0].clientX; }, { passive: true });
     lb.addEventListener('touchend', function (e) { var d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 50) show(d < 0 ? idx + 1 : idx - 1); }, { passive: true });
   }
-  // Buchungsformular → WhatsApp oder E-Mail mit vorformuliertem Text
+  // Formular: speichert jede Anfrage in Netlify Forms; optional zusätzlich WhatsApp mit vorformuliertem Text
   var form = document.getElementById('bookingForm');
   if (form) {
-    var via = 'wa';
-    form.querySelectorAll('button[type=submit]').forEach(function (b) { b.addEventListener('click', function () { via = b.getAttribute('data-via'); }); });
+    var via = 'form';
+    var buttons = form.querySelectorAll('button[type=submit]');
+    buttons.forEach(function (b) { b.addEventListener('click', function () { via = b.getAttribute('data-via'); }); });
+    var err = document.getElementById('formError'), ok = document.getElementById('formOk');
+    function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+    function label(id) { var l = document.getElementById(id).closest('label'); return l ? l.querySelector('span').textContent.replace(' *', '') : id; }
+    function waText() {
+      var lines = [form.getAttribute('data-subject') + ' – Madutours', ''];
+      ['f-name', 'f-email', 'f-phone', 'f-people', 'f-arrival', 'f-departure', 'f-type'].forEach(function (id) { if (val(id)) lines.push(label(id) + ': ' + val(id)); });
+      lines.push('', val('f-message'));
+      return lines.join('\n');
+    }
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
-      var err = document.getElementById('formError');
-      if (!v('f-name') || !v('f-message')) { err.textContent = form.getAttribute('data-required'); err.hidden = false; return; }
-      err.hidden = true;
-      var lab = function (id) { var l = document.querySelector('label[for=' + id + ']') || document.getElementById(id).closest('label'); return l ? l.querySelector('span').textContent.replace(' *', '') : id; };
-      var lines = [form.getAttribute('data-subject') + ' – Madutours', ''];
-      ['f-name', 'f-email', 'f-phone', 'f-people', 'f-arrival', 'f-departure', 'f-type'].forEach(function (id) { if (v(id)) lines.push(lab(id) + ': ' + v(id)); });
-      lines.push('', v('f-message'));
-      var text = lines.join('\n');
-      if (via === 'mail') {
-        location.href = 'mailto:' + form.getAttribute('data-mail') + '?subject=' + encodeURIComponent(form.getAttribute('data-subject') + ' – ' + v('f-type')) + '&body=' + encodeURIComponent(text);
-      } else {
-        window.open('https://wa.me/' + form.getAttribute('data-wa') + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
-      }
+      err.hidden = true; ok.hidden = true;
+      if (!val('f-name') || !val('f-message')) { err.textContent = form.getAttribute('data-required'); err.hidden = false; return; }
+      var useWa = via === 'wa';
+      // WhatsApp-Fenster sofort öffnen, damit der Popup-Blocker nicht eingreift
+      if (useWa) window.open('https://wa.me/' + form.getAttribute('data-wa') + '?text=' + encodeURIComponent(waText()), '_blank', 'noopener');
+      var original = [];
+      buttons.forEach(function (b) { b.disabled = true; original.push(b.innerHTML); });
+      var body = new URLSearchParams(new FormData(form)).toString();
+      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); ok.textContent = form.getAttribute('data-ok'); ok.hidden = false; form.reset(); })
+        .catch(function () { if (!useWa) { err.textContent = form.getAttribute('data-fail'); err.hidden = false; } })
+        .then(function () { buttons.forEach(function (b, i) { b.disabled = false; b.innerHTML = original[i]; }); });
     });
   }
 })();

@@ -204,6 +204,11 @@ svg{width:1.25em;height:1.25em;flex:none}
 .booking input:focus,.booking select:focus,.booking textarea:focus{border-color:var(--gold);outline:3px solid rgba(210,149,59,.25);outline-offset:0}
 .booking textarea{resize:vertical}
 .form-error{color:#9b2c2c;font-weight:700;margin-top:1rem}
+.form-ok{background:#eaf6ec;color:#1f5130;border:1px solid #b9dfc1;border-radius:10px;padding:1rem 1.25rem;font-weight:700;margin-top:1rem}
+.btn-ghost-dark{background:transparent;color:var(--night);border-color:var(--night)}
+.btn-ghost-dark:hover{background:var(--night);color:#fff}
+.btn[disabled]{opacity:.6;cursor:progress;transform:none}
+.hp{position:absolute;left:-9999px}
 @media (max-width:600px){.booking .grid2{grid-template-columns:1fr}}
 .contact-cards{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .ccard{display:flex;flex-direction:column;gap:.3rem;padding:1.5rem;border-radius:var(--radius);background:var(--paper);border:1px solid var(--line);text-decoration:none;color:var(--ink);box-shadow:var(--shadow)}
