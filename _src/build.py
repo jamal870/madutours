@@ -417,6 +417,7 @@ def main():
     css = (SRC / "style.css").read_text(); js = (SRC / "main.js").read_text()
     ASSET_V = hashlib.md5((css + js).encode()).hexdigest()[:8]
     (DIST / "css/style.css").write_text(css); (DIST / "js/main.js").write_text(js)
+    shutil.copy(SRC / "_redirects", DIST / "_redirects")
     make_logos()
     urls = []
     for lang in LANGS:
